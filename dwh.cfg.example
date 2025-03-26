@@ -1,0 +1,14 @@
+[CLUSTER]
+host = sparkify-dwh.c0uz92mbexmg.us-west-2.redshift.amazonaws.com
+db_name = sparkify
+db_user = admin
+db_password = your_password_here
+db_port = 5439
+
+[IAM_ROLE]
+arn = arn:aws:iam::861090284071:role/redshift-s3-access
+
+[S3]
+log_data = s3://udacity-dend/log_data
+log_jsonpath = s3://udacity-dend/log_json_path.json
+song_data = s3://udacity-dend/song_data
