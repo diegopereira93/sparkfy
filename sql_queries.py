@@ -1,12 +1,12 @@
 """
-Queries SQL usadas no projeto Sparkify Data Warehouse.
-Este módulo contém todas as definições de consultas SQL para criação, 
-exclusão e manipulação de tabelas no data warehouse.
+SQL Queries for Sparkify Data Warehouse Project.
+This module contains all SQL query definitions for creating, 
+dropping, and manipulating tables in the data warehouse.
 """
 import configparser
 
 
-# Configuração
+# Configuration
 config = configparser.ConfigParser()
 config.read('dwh.cfg')
 
@@ -212,10 +212,10 @@ time_table_insert = ("""
 """)
 
 # ----------------------
-# CONSULTAS ANALÍTICAS
+# ANALYTICAL QUERIES
 # ----------------------
 
-# Top 10 músicas mais populares
+# Top 10 Most Popular Songs
 popular_songs_query = """
 SELECT s.title, COUNT(*) as play_count
 FROM songplays sp
@@ -225,7 +225,7 @@ ORDER BY play_count DESC
 LIMIT 10;
 """
 
-# Atividade do usuário por hora do dia
+# User Activity by Hour of Day
 hourly_activity_query = """
 SELECT t.hour, COUNT(*) as activity_count
 FROM songplays sp
@@ -234,14 +234,14 @@ GROUP BY t.hour
 ORDER BY t.hour;
 """
 
-# Distribuição de usuários gratuitos vs. pagos
+# Free vs. Paid User Distribution
 user_distribution_query = """
 SELECT level, COUNT(DISTINCT user_id) as user_count
 FROM songplays
 GROUP BY level;
 """
 
-# Top 5 localizações por contagem de usuários
+# Top 5 Locations by User Count
 top_locations_query = """
 SELECT location, COUNT(DISTINCT user_id) as user_count
 FROM songplays
@@ -250,7 +250,7 @@ ORDER BY user_count DESC
 LIMIT 5;
 """
 
-# Usuários mais ativos
+# Most Active Users
 active_users_query = """
 SELECT u.user_id, u.first_name, u.last_name, COUNT(*) as song_plays
 FROM songplays sp
@@ -260,17 +260,17 @@ ORDER BY song_plays DESC
 LIMIT 10;
 """
 
-# Reproduções de músicas por dia da semana
+# Music Plays by Day of Week
 weekday_plays_query = """
 SELECT 
     CASE t.weekday
-        WHEN 0 THEN 'Domingo'
-        WHEN 1 THEN 'Segunda'
-        WHEN 2 THEN 'Terça'
-        WHEN 3 THEN 'Quarta'
-        WHEN 4 THEN 'Quinta'
-        WHEN 5 THEN 'Sexta'
-        WHEN 6 THEN 'Sábado'
+        WHEN 0 THEN 'Sunday'
+        WHEN 1 THEN 'Monday'
+        WHEN 2 THEN 'Tuesday'
+        WHEN 3 THEN 'Wednesday'
+        WHEN 4 THEN 'Thursday'
+        WHEN 5 THEN 'Friday'
+        WHEN 6 THEN 'Saturday'
     END as day_of_week,
     COUNT(*) as play_count
 FROM songplays sp
@@ -280,21 +280,21 @@ ORDER BY t.weekday;
 """
 
 # ----------------------
-# LISTAS DE CONSULTAS
+# QUERY LISTS
 # ----------------------
 
-# Listas para operações de tabela
+# Lists for table operations
 create_table_queries = [staging_events_table_create, staging_songs_table_create, songplay_table_create, user_table_create, song_table_create, artist_table_create, time_table_create]
 drop_table_queries = [staging_events_table_drop, staging_songs_table_drop, songplay_table_drop, user_table_drop, song_table_drop, artist_table_drop, time_table_drop]
 copy_table_queries = [staging_events_copy, staging_songs_copy]
 insert_table_queries = [songplay_table_insert, user_table_insert, song_table_insert, artist_table_insert, time_table_insert]
 
-# Dicionário de consultas analíticas com nomes descritivos como chaves
+# Dictionary of analytical queries with descriptive names as keys
 analytics_queries = {
-    "Top 10 Músicas Mais Populares": popular_songs_query,
-    "Atividade do Usuário por Hora do Dia": hourly_activity_query,
-    "Distribuição de Usuários Gratuitos vs. Pagos": user_distribution_query,
-    "Top 5 Localizações por Contagem de Usuários": top_locations_query,
-    "Usuários Mais Ativos": active_users_query,
-    "Reproduções de Músicas por Dia da Semana": weekday_plays_query
+    "Top 10 Most Popular Songs": popular_songs_query,
+    "User Activity by Hour of Day": hourly_activity_query,
+    "Free vs. Paid User Distribution": user_distribution_query,
+    "Top 5 Locations by User Count": top_locations_query,
+    "Most Active Users": active_users_query,
+    "Music Plays by Day of Week": weekday_plays_query
 }

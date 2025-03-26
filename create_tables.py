@@ -8,42 +8,42 @@ from utils import (
 
 def drop_tables(cur, conn):
     """
-    Exclui todas as tabelas definidas em drop_table_queries.
+    Drops all tables defined in drop_table_queries.
     
     Parameters:
-        cur: cursor para execução de comandos SQL
-        conn: conexão com o banco de dados
+        cur: cursor for executing SQL commands
+        conn: database connection
     """
-    print("Excluindo tabelas existentes...")
+    print("Dropping existing tables...")
     
     for i, query in enumerate(drop_table_queries, 1):
-        table_name = query.split("DROP TABLE")[1].split(";")[0].strip() if "DROP TABLE" in query else f"Tabela {i}"
-        print(f"  Excluindo {table_name}...")
-        execute_query(cur, conn, query, f"Excluindo {table_name}")
+        table_name = query.split("DROP TABLE")[1].split(";")[0].strip() if "DROP TABLE" in query else f"Table {i}"
+        print(f"  Dropping {table_name}...")
+        execute_query(cur, conn, query, f"Dropping {table_name}")
 
 
 def create_tables(cur, conn):
     """
-    Cria todas as tabelas definidas em create_table_queries.
+    Creates all tables defined in create_table_queries.
     
     Parameters:
-        cur: cursor para execução de comandos SQL
-        conn: conexão com o banco de dados
+        cur: cursor for executing SQL commands
+        conn: database connection
     """
-    print("\nCriando tabelas...")
+    print("\nCreating tables...")
     
     for i, query in enumerate(create_table_queries, 1):
-        table_name = query.split("CREATE TABLE")[1].split("(")[0].strip() if "CREATE TABLE" in query else f"Tabela {i}"
-        print(f"  Criando {table_name}...")
-        execute_query(cur, conn, query, f"Criando {table_name}")
+        table_name = query.split("CREATE TABLE")[1].split("(")[0].strip() if "CREATE TABLE" in query else f"Table {i}"
+        print(f"  Creating {table_name}...")
+        execute_query(cur, conn, query, f"Creating {table_name}")
 
 
 def run_setup():
     """
-    Função principal que configura as tabelas do banco de dados.
+    Main function that sets up database tables.
     """
     print("\n" + "=" * 80)
-    print("CONFIGURAÇÃO DE TABELAS DO SPARKIFY")
+    print("SPARKIFY TABLE SETUP")
     print("=" * 80)
     
     start_time = time.time()
@@ -52,27 +52,27 @@ def run_setup():
     cur = None
     
     try:
-        # Conectar ao banco de dados
+        # Connect to the database
         conn, cur = connect_to_redshift()
         
-        # Executar operações de banco de dados
+        # Execute database operations
         drop_tables(cur, conn)
         create_tables(cur, conn)
         
-        # Calcular e exibir tempo total
+        # Calculate and display total time
         elapsed_time = time.time() - start_time
-        print(f"\nConfiguração de tabelas concluída com sucesso em {elapsed_time:.2f} segundos!")
+        print(f"\nTable setup completed successfully in {elapsed_time:.2f} seconds!")
         
     except Exception as e:
-        print(f"Erro durante a configuração de tabelas: {e}")
+        print(f"Error during table setup: {e}")
         raise
     finally:
-        # Fechar conexões diretamente
+        # Close connections directly
         if cur:
             cur.close()
         if conn:
             conn.close()
-        print("Conexão com o banco de dados fechada.")
+        print("Database connection closed.")
 
 
 if __name__ == "__main__":

@@ -1,139 +1,110 @@
-# Projeto de Data Warehouse da Sparkify
+# Sparkify Data Warehouse Project
 
-## Visão Geral do Projeto
-A Sparkify, uma startup de streaming de música, expandiu sua base de usuários e banco de dados de músicas e deseja migrar seus processos e dados para a nuvem. Seus dados estão no S3, em um diretório de logs JSON sobre a atividade dos usuários no aplicativo, bem como em um diretório com metadados JSON sobre as músicas do aplicativo.
+## Project Overview
+Sparkify, a music streaming startup, has expanded its user base and music database and aims to migrate its processes and data to the cloud. The data is stored in S3, with JSON log files documenting user activity in the application and JSON metadata files about the app's music catalog.
 
-Este projeto desenvolve um pipeline ETL que extrai dados do S3, os processa, e os armazena em um conjunto de tabelas dimensionais em um data warehouse Redshift, permitindo que a equipe de análise obtenha insights valiosos sobre quais músicas os usuários estão ouvindo.
+This project develops an ETL pipeline that extracts data from S3, processes it, and stores it in a set of dimensional tables in a Redshift data warehouse, enabling the analytics team to gain valuable insights into user music listening patterns.
 
-## Design do Esquema do Banco de Dados
+## Database Schema Design
 
-### Tabelas de Staging
-- **staging_events**: Armazena dados brutos de eventos dos arquivos de log
-- **staging_songs**: Armazena dados brutos de músicas
+### Staging Tables
+- **staging_events**: Stores raw event data from log files
+- **staging_songs**: Stores raw song metadata
 
-### Tabelas Analíticas (Esquema Estrela)
+### Analytical Tables (Star Schema)
 
-#### Tabela Fato
-- **songplays**: Registros associados às reproduções de músicas
+#### Fact Table
+- **songplays**: Records associated with music playbacks
   - *songplay_id, start_time, user_id, level, song_id, artist_id, session_id, location, user_agent*
 
-#### Tabelas de Dimensão
-- **users**: Usuários no aplicativo
+#### Dimension Tables
+- **users**: Users in the application
   - *user_id, first_name, last_name, gender, level*
-- **songs**: Músicas no banco de dados
+- **songs**: Songs in the database
   - *song_id, title, artist_id, year, duration*
-- **artists**: Artistas no banco de dados
+- **artists**: Artists in the database
   - *artist_id, name, location, latitude, longitude*
-- **time**: Timestamps dos registros em songplays divididos em unidades específicas de tempo
+- **time**: Timestamps from songplays records broken down into specific time units
   - *start_time, hour, day, week, month, year, weekday*
 
-  ### Diagrama do Modelo de Dados
+### Data Model Diagram
   
-![Diagrama](dbdiagram.png)
+![Diagram](dbdiagram.png)
 
+The diagram illustrates the star schema structure and relationships between tables:
+- The fact table `songplays` is centrally located, connected to all dimension tables
+- Arrows show foreign key relationships between tables
+- Staging tables (`staging_events` and `staging_songs`) feed the analytical model
+- `songplays` filters only events where `page = 'NextSong'`, ensuring only music playback events are recorded
 
-O diagrama acima ilustra a estrutura do esquema estrela e a relação entre as tabelas:
-- A tabela fato `songplays` está no centro, conectada a todas as tabelas de dimensão
-- As setas mostram as relações de chave estrangeira entre as tabelas
-- As tabelas de staging (`staging_events` e `staging_songs`) alimentam o modelo analítico
-- `songplays` filtra apenas eventos onde `page = 'NextSong'`, garantindo que apenas eventos de reprodução de música sejam registrados
+### Schema Design Rationale
+This project implements a star schema optimized for music playback analysis. The schema includes:
 
-### Justificativa do Design do Esquema
-Este projeto implementa um esquema estrela otimizado para consultas sobre análise de reprodução de músicas. O esquema inclui:
+1. A centralized fact table (**songplays**) focusing on user music playbacks
+2. Four dimension tables (**users**, **songs**, **artists**, **time**) providing descriptive attributes
 
-1. Uma tabela fato centralizada (**songplays**) com foco nas reproduções de músicas pelos usuários
-2. Quatro tabelas de dimensão (**users**, **songs**, **artists**, **time**) fornecendo atributos descritivos
+This design offers the following benefits:
+- Simple and intuitive structure for business users
+- Fast aggregations across all dimensions
+- Efficiency for known query patterns
+- Reduced need for complex joins
+- Performance optimized with Redshift distribution and sort keys
 
-Este design oferece os seguintes benefícios:
-- Estrutura simples e intuitiva para usuários de negócios
-- Agregações rápidas em todas as dimensões
-- Eficiência para padrões de consulta conhecidos
-- Redução da necessidade de joins complexos
-- Desempenho otimizado com chaves de distribuição e ordenação do Redshift
+## ETL Pipeline
 
-## Pipeline ETL
+1. Loads configurations from `dwh.cfg` using the `get_config()` utility function
+2. Displays detailed information about available S3 files for processing
+3. Processes individual music files, extracting data for `songs` and `artists` tables
+4. Processes individual log files, extracting data for `time`, `users`, and `songplays` tables
+5. Provides real-time feedback on processing progress, including performance metrics
 
-O pipeline ETL agora segue uma abordagem mais eficiente e robusta:
+## Project Files
 
-1. Carrega configurações do arquivo `dwh.cfg` usando a função utilitária `get_config()`
-2. Exibe informações detalhadas sobre os arquivos S3 disponíveis para processamento
-3. Processa arquivos de música individualmente, extraindo dados para as tabelas `songs` e `artists`
-4. Processa arquivos de log individualmente, extraindo dados para as tabelas `time`, `users` e `songplays` 
-5. Fornece feedback em tempo real sobre o progresso do processamento, incluindo métricas de desempenho
+- **utils.py**: Central module with shared utility functions
+- **sql_queries.py**: Contains all SQL queries used in ETL and analysis processes, now using dictionaries for better organization
+- **create_tables.py**: Creates database tables with detailed feedback
+- **etl.py**: Implements ETL process with individual file processing and monitoring
+- **run_analytics.py**: Executes predefined analytical queries using the query dictionary
+- **dwh.cfg**: Configuration file for AWS credentials and S3 file paths
+- **requirements.txt**: List of dependencies required to run the project
 
-## Arquivos do Projeto
+## Analytical Queries
 
-- **utils.py**: Módulo central com funções utilitárias compartilhadas entre os scripts
-- **sql_queries.py**: Contém todas as consultas SQL usadas no processo ETL e análises, agora usando dicionários para melhor organização
-- **create_tables.py**: Cria as tabelas do banco de dados com feedback detalhado
-- **etl.py**: Implementa o processo ETL com processamento de arquivo individual e monitoramento
-- **list_s3_files.py**: Ferramenta interativa para explorar arquivos do S3 com informações detalhadas
-- **run_analytics.py**: Executa consultas analíticas predefinidas usando o dicionário de consultas
-- **dwh.cfg**: Arquivo de configuração para credenciais AWS e caminhos de arquivos S3
-- **requirements.txt**: Lista de dependências necessárias para executar o projeto
+The project now uses a dictionary to organize analytical queries, providing:
 
-## Consultas Analíticas
+1. **Better Organization**: Each query is directly associated with its descriptive name
+2. **Simplified Maintenance**: Easy to add, remove, or modify queries
+3. **Cleaner Code**: Elimination of separate lists for queries and their names
 
-O projeto agora utiliza um dicionário para organizar as consultas analíticas, proporcionando:
+Available analytical queries:
+- **Top 10 Most Popular Songs**: Identifies songs with the highest number of playbacks
+- **User Activity by Hour of Day**: Analyzes usage patterns throughout the day
+- **Free vs. Paid User Distribution**: Compares the number of users in each subscription level
+- **Top 5 Locations by User Count**: Identifies regions with the most users
+- **Most Active Users**: Lists users who listen to the most music
+- **Music Playbacks by Day of Week**: Analyzes usage patterns across the week
 
-1. **Melhor Organização**: Cada consulta está associada diretamente ao seu nome descritivo
-2. **Manutenção Simplificada**: Facilidade para adicionar, remover ou modificar consultas
-3. **Código Mais Limpo**: Eliminação da necessidade de listas separadas para consultas e seus nomes
+## How to Execute
 
-Consultas analíticas disponíveis:
-- **Top 10 Músicas Mais Populares**: Identifica as músicas com maior número de reproduções
-- **Atividade do Usuário por Hora do Dia**: Analisa o padrão de uso ao longo do dia
-- **Distribuição de Usuários Gratuitos vs. Pagos**: Compara o número de usuários em cada nível de assinatura
-- **Top 5 Localizações por Contagem de Usuários**: Identifica as regiões com mais usuários
-- **Usuários Mais Ativos**: Lista os usuários que mais ouvem músicas
-- **Reproduções de Músicas por Dia da Semana**: Analisa o padrão de uso ao longo da semana
-
-## Melhorias na Estrutura do Código
-
-O projeto foi completamente refatorado para:
-
-1. **Modularidade Aprimorada**: Centralização de código comum em módulo utilitário
-2. **Redução de Redundância**: Eliminação de funções duplicadas em diferentes arquivos
-3. **Padronização**: Estilo consistente de código e tratamento de erros
-4. **Estruturas de Dados Otimizadas**: Uso de dicionários para melhor organização das consultas
-5. **Feedback Aprimorado**: Informações detalhadas sobre o progresso e desempenho
-6. **Interatividade**: Ferramentas auxiliares com interfaces mais amigáveis
-
-## Como Executar
-
-1. Instale as dependências:
+1. Install dependencies:
    ```
    pip install -r requirements.txt
    ```
 
-2. Configure suas credenciais AWS no arquivo `dwh.cfg`
+2. Configure your AWS credentials in `dwh.cfg`
 
-3. Crie as tabelas do banco de dados:
+3. Create database tables:
    ```
    python create_tables.py
    ```
 
-4. Execute o processo ETL completo:
+4. Run the complete ETL process:
    ```
    python etl.py
    ```
 
-5. Explore os arquivos no bucket S3 (interface interativa):
-   ```
-   python list_s3_files.py
-   ```
 
-6. Execute consultas analíticas predefinidas:
+5. Execute predefined analytical queries:
    ```
    python run_analytics.py
    ```
-
-## Ferramentas de Monitoramento
-
-O projeto inclui recursos avançados de monitoramento para o processo ETL:
-
-- **Visibilidade de Arquivos S3**: Estatísticas detalhadas sobre os arquivos sendo processados
-- **Indicadores de Progresso**: Acompanhamento em tempo real das etapas do ETL
-- **Métricas de Desempenho**: Tempo de execução para cada operação principal
-- **Amostragem de Dados**: Visualização prévia dos dados para verificação rápida
-- **Formatação Aprimorada**: Apresentação profissional dos resultados de consultas
