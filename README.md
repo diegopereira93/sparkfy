@@ -86,6 +86,19 @@ Available analytical queries:
 
 ## How to Execute
 
+Redshift Cluster Management Tool
+
+A Python script that uses boto3 to manage an Amazon Redshift cluster. It sets up an IAM role for S3 access, creates and configures the cluster, and updates 'dwh.cfg'. It can also delete the cluster and role. Config uses 'dwh.cfg' and '.env', with prompts for missing values.
+
+   ```
+   python create_tables.py
+   ```
+
+Options:
+  1: Set up cluster (prompts for config, updates 'dwh.cfg', opens ports)
+  2: Delete cluster and IAM role
+
+
 1. Install dependencies:
    ```
    pip install -r requirements.txt
