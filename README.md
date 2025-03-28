@@ -5,6 +5,8 @@ Sparkify, a music streaming startup, has expanded its user base and music databa
 
 This project develops an ETL pipeline that extracts data from S3, processes it, and stores it in a set of dimensional tables in a Redshift data warehouse, enabling the analytics team to gain valuable insights into user music listening patterns.
 
+![image](https://github.com/user-attachments/assets/71e87483-36ee-4e7f-b3bd-41ebd0f2478b)
+
 ## Database Schema Design
 
 ### Staging Tables
